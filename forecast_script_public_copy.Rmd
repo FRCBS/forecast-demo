@@ -242,7 +242,7 @@ beginning <- head(tail(monthly$date, 49), 1) # Define beginning of (monthly) tim
 last_month <- tail(monthly_real$date, 1) # Not using "today()" as the data may not reach to current date
 
 # We will need these stored
-modelnames <- c("SNAIVE", "5-MA", "7-MA", "9-MA", "12-MA", "STL", "ETS", "TBATS", "STLF", "DYNREG", "DL", "NN", "COMBINED")
+modelnames <- c("SNAIVE", "5-MA", "7-MA", "9-MA", "12-MA", "STL", "ETS", "TBATS", "STLF", "ARIMAX", "DYNREG", "NN", "COMBINED")
 ```
 
 ```{r datasets_weekly, include = FALSE}

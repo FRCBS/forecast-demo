@@ -51,7 +51,7 @@ find_errors <- function(beginning, series.ts, method = "none", freq = "monthly")
   # 
   # param:: beginning: Beginning of the series
   # param:: series.ts: timeseries object
-  # param:: method: str of "tslm", "stl", "ets", "tbats", "stlf", "snaive", "(5,7,9,12)-MA", "dynreg", "nn", "combination"
+  # param:: method: str of model
   # param:: freq: str of "monthly" or "weekly"
   # return:: A vector of errors.
   
@@ -63,7 +63,7 @@ find_errors <- function(beginning, series.ts, method = "none", freq = "monthly")
       train <- ts(series.ts[i:(35 + i)], start = decimal_date(beginning) + months(i - 1), frequency = 12)
       test <- ts(series.ts[(36 + i)], start = decimal_date(beginning) + months(36 + i), frequency = 12)
 
-      # xregs for dynamic regression
+      # xregs for arimax
       nrow <- length(train)
       onehotyear <- matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                              0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -122,11 +122,11 @@ find_errors <- function(beginning, series.ts, method = "none", freq = "monthly")
         fit <- stlf(train)
         fcast <- forecast(fit, h = 1)$mean
       }
-      if(method == "dynreg"){
+      if(method == "arimax"){
         fit <- auto.arima(train, xreg = month.m)
         fcast <- forecast(fit, xreg = horizon.m, h = 1)$mean
       }
-      if(method == "tslm"){
+      if(method == "dynreg"){
         fit1 <- tslm(train ~ trend + season)
         fcast1 <- forecast(fit1, h = 1)
         
@@ -178,11 +178,11 @@ find_errors <- function(beginning, series.ts, method = "none", freq = "monthly")
         stlf.fit <- stlf(train)
         stlf.fcast <- forecast(stlf.fit, h = 1)$mean
         
-        # DynReg
-        dynreg.fit <- auto.arima(train, xreg = month.m)
-        dynreg.fcast <- forecast(dynreg.fit, xreg = horizon.m, h = 1)$mean
+        # Arimax
+        arimax.fit <- auto.arima(train, xreg = month.m)
+        arimax.fcast <- forecast(arimax.fit, xreg = horizon.m, h = 1)$mean
         
-        # Double linear
+        # Dynamic regression
         fit1 <- tslm(train ~ trend + season)
         fcast1 <- forecast(fit1, h = 1)
         
@@ -191,14 +191,14 @@ find_errors <- function(beginning, series.ts, method = "none", freq = "monthly")
         
         y <- as.numeric(fcast1$mean)
         x <- as.numeric(fcast2$mean)
-        dl.fcast <- x + y
+        dynreg.fcast <- x + y
         
         # NNETAR
         nn.fit <- nnetar(train)
         nn.fcast <- forecast(nn.fit, h = 1)$mean
         
         fcast <- mean(c(snaive.fcast, ma5.fcast, ma7.fcast, ma9.fcast, ma12.fcast, stl.fcast, 
-                        ets.fcast, tbats.fcast, stlf.fcast, dynreg.fcast, dl.fcast, nn.fcast))
+                        ets.fcast, tbats.fcast, stlf.fcast, arimax.fcast, dynreg.fcast, nn.fcast))
       }
       
       # Calculate errors
@@ -216,7 +216,7 @@ find_errors <- function(beginning, series.ts, method = "none", freq = "monthly")
         train <- ts(series.ts[i:(155 + i)], start = decimal_date(beginning) + weeks(i - 1), frequency = 52)
         test <- ts(series.ts[(156 + i)], start = decimal_date(beginning) + weeks(156 + i), frequency = 52)
 
-        # xregs for dynamic regression
+        # xregs for arimax
         nrow <- length(train)
         onehotyear <- matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                                 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -275,11 +275,11 @@ find_errors <- function(beginning, series.ts, method = "none", freq = "monthly")
           fit <- stlf(train)
           fcast <- forecast(fit, h = 1)$mean
         }
-        if(method == "dynreg"){
+        if(method == "arimax"){
           fit <- auto.arima(train, xreg = month.m)
           fcast <- forecast(fit, xreg = horizon.m, h = 1)$mean
         }
-        if(method == "tslm"){
+        if(method == "dynreg"){
           fit1 <- tslm(train ~ trend + season)
           fcast1 <- forecast(fit1, h = 1)
           
@@ -331,11 +331,11 @@ find_errors <- function(beginning, series.ts, method = "none", freq = "monthly")
           stlf.fit <- stlf(train)
           stlf.fcast <- forecast(stlf.fit, h = 1)$mean
           
-          # DynReg
-          dynreg.fit <- auto.arima(train, xreg = month.m)
-          dynreg.fcast <- forecast(dynreg.fit, xreg = horizon.m, h = 1)$mean
+          # Arimax
+          arimax.fit <- auto.arima(train, xreg = month.m)
+          arimax.fcast <- forecast(arimax.fit, xreg = horizon.m, h = 1)$mean
           
-          # Double linear
+          # Dynamic regression
           fit1 <- tslm(train ~ trend + season)
           fcast1 <- forecast(fit1, h = 1)
           
@@ -344,14 +344,14 @@ find_errors <- function(beginning, series.ts, method = "none", freq = "monthly")
           
           y <- as.numeric(fcast1$mean)
           x <- as.numeric(fcast2$mean)
-          dl.fcast <- x + y
+          dynreg.fcast <- x + y
           
           # NNETAR
           nn.fit <- nnetar(train)
           nn.fcast <- forecast(nn.fit, h = 1)$mean
           
           fcast <- mean(c(snaive.fcast, ma5.fcast, ma7.fcast, ma9.fcast, ma12.fcast, stl.fcast, 
-                          ets.fcast, tbats.fcast, stlf.fcast, dynreg.fcast, dl.fcast, nn.fcast))
+                          ets.fcast, tbats.fcast, stlf.fcast, arimax.fcast, dynreg.fcast, nn.fcast))
         }
         
         # Calculate errors
@@ -377,13 +377,13 @@ select_model <- function(beginning, series.ts, freq){
   ets.apes <- find_errors(beginning, series.ts, "ets", freq = freq)
   tbats.apes <- find_errors(beginning, series.ts, "tbats", freq = freq)
   stlf.apes <- find_errors(beginning, series.ts, "stlf", freq = freq)
+  arimax.apes <- find_errors(beginning, series.ts, "arimax", freq = freq)
   dynreg.apes <- find_errors(beginning, series.ts, "dynreg", freq = freq)
-  dl.apes <- find_errors(beginning, series.ts, "tslm", freq = freq)
   nn.apes <- find_errors(beginning, series.ts, "nn", freq = freq)
   comb.apes <- find_errors(beginning, series.ts, "combined", freq = freq)
   
   m <- matrix(c(snaive.apes, ma5.apes, ma7.apes, ma9.apes, ma12.apes, stl.apes, ets.apes, 
-                tbats.apes, stlf.apes, dynreg.apes, dl.apes, nn.apes, comb.apes),
+                tbats.apes, stlf.apes, arimax.apes, dynreg.apes, nn.apes, comb.apes),
               ncol = 13,
               byrow = FALSE)
   
@@ -397,7 +397,7 @@ select_model <- function(beginning, series.ts, freq){
 chosen_forecast <- function(chosen.model, series.ts, monthly, freq = "monthly"){
   if(freq == "monthly"){  # Monthly forecast
     train <- ts(tail(series.ts, 36), start = decimal_date(head(tail(monthly$date, 36), 1)), frequency = 12)  # 3 year window
-    # xregs for dynreg
+    # xregs for arimax
     nrow <- length(train)
     onehotyear <- matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                            0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -491,11 +491,11 @@ chosen_forecast <- function(chosen.model, series.ts, monthly, freq = "monthly"){
       stlf.fit <- stlf(train)
       stlf.fcast <- forecast(stlf.fit, h = 6)$mean
       
-      # DynReg
-      dynreg.fit <- auto.arima(train, xreg = month.m)
-      dynreg.fcast <- forecast(dynreg.fit, xreg = horizon.m, h = 6)$mean
+      # Arimax
+      arimax.fit <- auto.arima(train, xreg = month.m)
+      arimax.fcast <- forecast(arimax.fit, xreg = horizon.m, h = 6)$mean
       
-      # Double linear
+      # Dynamic regression
       fit1 <- tslm(train ~ trend + season)
       fcast1 <- forecast(fit1, h = 6)
       
@@ -504,14 +504,14 @@ chosen_forecast <- function(chosen.model, series.ts, monthly, freq = "monthly"){
       
       y <- as.numeric(fcast1$mean)
       x <- as.numeric(fcast2$mean)
-      dl.fcast <- x + y
+      dynreg.fcast <- x + y
       
       # NNETAR
       nn.fit <- nnetar(train)
       nn.fcast <- forecast(nn.fit, h = 6)
       
       forecasts <- colMeans(matrix(c(snaive.fcast, ma5.fcast, ma7.fcast, ma9.fcast, ma12.fcast, stl.fcast,
-                                 ets.fcast, tbats.fcast, stlf.fcast, dynreg.fcast, dl.fcast, nn.fcast), 
+                                 ets.fcast, tbats.fcast, stlf.fcast, arimax.fcast, dynreg.fcast, nn.fcast), 
                                ncol = 6, 
                                byrow = TRUE))
     }
@@ -542,7 +542,7 @@ chosen_forecast <- function(chosen.model, series.ts, monthly, freq = "monthly"){
   }
   if(freq == "weekly"){  # Weekly forecast
     train <- ts(tail(series.ts, 156), start = decimal_date(head(tail(monthly$date, 156), 1)), frequency = 52)  # Three year window
-    # xregs for dynreg
+    # xregs for arimax
     nrow <- length(train)
     onehotyear <- matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                            0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -636,11 +636,11 @@ chosen_forecast <- function(chosen.model, series.ts, monthly, freq = "monthly"){
       stlf.fit <- stlf(train)
       stlf.fcast <- forecast(stlf.fit, h = 4)$mean
       
-      # DynReg
-      dynreg.fit <- auto.arima(train, xreg = month.m)
-      dynreg.fcast <- forecast(dynreg.fit, xreg = horizon.m, h = 4)$mean
+      # Arimax
+      arimax.fit <- auto.arima(train, xreg = month.m)
+      arimax.fcast <- forecast(arimax.fit, xreg = horizon.m, h = 4)$mean
       
-      # Double linear
+      # Dynamic regression
       fit1 <- tslm(train ~ trend + season)
       fcast1 <- forecast(fit1, h = 4)
       
@@ -649,14 +649,14 @@ chosen_forecast <- function(chosen.model, series.ts, monthly, freq = "monthly"){
       
       y <- as.numeric(fcast1$mean)
       x <- as.numeric(fcast2$mean)
-      dl.fcast <- x + y
+      dynreg.fcast <- x + y
       
       # NNETAR
       nn.fit <- nnetar(train)
       nn.fcast <- forecast(nn.fit, h = 4)
       
       forecasts <- colMeans(matrix(c(snaive.fcast, ma5.fcast, ma7.fcast, ma9.fcast, ma12.fcast, stl.fcast,
-                                     ets.fcast, tbats.fcast, stlf.fcast, dynreg.fcast, dl.fcast, nn.fcast), 
+                                     ets.fcast, tbats.fcast, stlf.fcast, arimax.fcast, dynreg.fcast, nn.fcast), 
                                    ncol = 4, 
                                    byrow = TRUE))
     }
@@ -694,7 +694,7 @@ chosen_forecast <- function(chosen.model, series.ts, monthly, freq = "monthly"){
 chosen_forecast_extended <- function(chosen.model, series.ts, monthly, freq = "monthly"){
   if(freq == "monthly"){  # Monthly forecast
     train <- ts(tail(series.ts, 36), start = decimal_date(head(tail(monthly$date, 36), 1)), frequency = 12)  # 3 year window
-    # xregs for dynreg
+    # xregs for arimax
     nrow <- length(train)
     onehotyear <- matrix(c(1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
                            0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -788,11 +788,11 @@ chosen_forecast_extended <- function(chosen.model, series.ts, monthly, freq = "m
       stlf.fit <- stlf(train)
       stlf.fcast <- forecast(stlf.fit, h = 23)$mean
       
-      # DynReg
-      dynreg.fit <- auto.arima(train, xreg = month.m)
-      dynreg.fcast <- forecast(dynreg.fit, xreg = horizon.m, h = 23)$mean
+      # Arimax
+      arimax.fit <- auto.arima(train, xreg = month.m)
+      arimax.fcast <- forecast(arimax.fit, xreg = horizon.m, h = 23)$mean
       
-      # Double linear
+      # Dynamic regression
       fit1 <- tslm(train ~ trend + season)
       fcast1 <- forecast(fit1, h = 23)
       
@@ -801,14 +801,14 @@ chosen_forecast_extended <- function(chosen.model, series.ts, monthly, freq = "m
       
       y <- as.numeric(fcast1$mean)
       x <- as.numeric(fcast2$mean)
-      dl.fcast <- x + y
+      dynreg.fcast <- x + y
       
       # NNETAR
       nn.fit <- nnetar(train)
       nn.fcast <- forecast(nn.fit, h = 23)
       
       forecasts <- colMeans(matrix(c(snaive.fcast, ma5.fcast, ma7.fcast, ma9.fcast, ma12.fcast, stl.fcast,
-                                     ets.fcast, tbats.fcast, stlf.fcast, dynreg.fcast, dl.fcast, nn.fcast), 
+                                     ets.fcast, tbats.fcast, stlf.fcast, arimax.fcast, dynreg.fcast, nn.fcast), 
                                    ncol = 23, 
                                    byrow = TRUE))
     }
@@ -881,7 +881,7 @@ draw_forecast <- function(forecast_dataframe, freq, history, type, modelname, pa
 
 save_forecast <- function(fdf, months = TRUE, monthly, modelname, history, file, reverse_adj){
   # We will need these stored
-  modelnames <- c("SNAIVE", "5-MA", "7-MA", "9-MA", "12-MA", "STL", "ETS", "TBATS", "STLF", "DYNREG", "DL", "NN", "COMBINED")
+  modelnames <- c("SNAIVE", "5-MA", "7-MA", "9-MA", "12-MA", "STL", "ETS", "TBATS", "STLF", "ARIMAX", "DYNREG", "NN", "COMBINED")
   
   # Extract type from filename
   if(months){
