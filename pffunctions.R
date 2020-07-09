@@ -381,7 +381,6 @@ select_model <- function(beginning, series.ts, freq){
   dl.apes <- find_errors(beginning, series.ts, "tslm", freq = freq)
   nn.apes <- find_errors(beginning, series.ts, "nn", freq = freq)
   comb.apes <- find_errors(beginning, series.ts, "combined", freq = freq)
-  print(paste0("Error finding time without combined set: ", endtime-starttime))
   
   m <- matrix(c(snaive.apes, ma5.apes, ma7.apes, ma9.apes, ma12.apes, stl.apes, ets.apes, 
                 tbats.apes, stlf.apes, dynreg.apes, dl.apes, nn.apes, comb.apes),
