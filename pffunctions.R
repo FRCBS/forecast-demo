@@ -508,7 +508,7 @@ chosen_forecast <- function(chosen.model, series.ts, monthly, freq = "monthly"){
       
       # NNETAR
       nn.fit <- nnetar(train)
-      nn.fcast <- forecast(nn.fit, h = 6)
+      nn.fcast <- forecast(nn.fit, h = 6)$mean
       
       forecasts <- colMeans(matrix(c(snaive.fcast, ma5.fcast, ma7.fcast, ma9.fcast, ma12.fcast, stl.fcast,
                                  ets.fcast, tbats.fcast, stlf.fcast, arimax.fcast, dynreg.fcast, nn.fcast), 
@@ -879,7 +879,7 @@ draw_forecast <- function(forecast_dataframe, freq, history, type, modelname, pa
   
 }
 
-save_forecast <- function(fdf, months = TRUE, monthly, modelname, history, file, reverse_adj){
+save_forecast <- function(fdf, months = TRUE, modelname, history, file, reverse_adj){
   # We will need these stored
   modelnames <- c("SNAIVE", "5-MA", "7-MA", "9-MA", "12-MA", "STL", "ETS", "TBATS", "STLF", "ARIMAX", "DYNREG", "NN", "COMBINED")
   
@@ -910,7 +910,7 @@ save_forecast <- function(fdf, months = TRUE, monthly, modelname, history, file,
                             lower95 = fdf$lower95[1]) 
   }
   
-  # Does forecast history exist?
+  # Does forecast history file exist?
   if(file.exists(file)){
     fcast.history <- read.csv(file, header = TRUE)
     fcast.history$time <- as.Date(fcast.history$time)
@@ -949,7 +949,7 @@ save_forecast <- function(fdf, months = TRUE, monthly, modelname, history, file,
           
           # Forecast
           chosen.model <- select_model(beginning, series.ts, freq = "monthly") # Choose model
-          mcast <- chosen_forecast(chosen.model, series.ts, monthly, freq = "monthly") # Output a forecast
+          mcast <- chosen_forecast(chosen.model, series.ts, history, freq = "monthly") # Output a forecast
           missing.fcast <- data.frame(time = tail(cutreal$date, 1), 
                                       model = modelnames[chosen.model], 
                                       forecast = mcast$fcast[1] * scaleback,
@@ -969,7 +969,7 @@ save_forecast <- function(fdf, months = TRUE, monthly, modelname, history, file,
           
           # Forecast
           chosen.model <- select_model(beginning, series.ts, freq = "weekly") # Choose model
-          mcast <- chosen_forecast(chosen.model, series.ts, monthly, freq = "weekly") # Output a forecast
+          mcast <- chosen_forecast(chosen.model, series.ts, history, freq = "weekly") # Output a forecast
           missing.fcast <- data.frame(time = tail(cutreal$startdate, 1), 
                                       model = modelnames[chosen.model], 
                                       forecast = mcast$fcast[1],
@@ -1016,9 +1016,7 @@ save_forecast <- function(fdf, months = TRUE, monthly, modelname, history, file,
         
         # Forecast
         chosen.model <- select_model(beginning, series.ts, freq = "monthly") # Choose model
-        print(chosen.model)
-        print(modelnames[chosen.model])
-        mcast <- chosen_forecast(chosen.model, series.ts, monthly, freq = "monthly") # Output a forecast
+        mcast <- chosen_forecast(chosen.model, series.ts, history, freq = "monthly") # Output a forecast
         missing.fcast <- data.frame(time = tail(cutreal$date, 1), 
                                     model = modelnames[chosen.model], 
                                     forecast = mcast$fcast[1] * scaleback,
@@ -1026,9 +1024,7 @@ save_forecast <- function(fdf, months = TRUE, monthly, modelname, history, file,
                                     upper95 = mcast$upper95[1] * scaleback,
                                     lower80 = mcast$lower80[1] * scaleback,
                                     lower95 = mcast$lower95[1] * scaleback, stringsAsFactors = FALSE)
-        print(missing.fcast)
         forecast.history[(i+1), ] <- missing.fcast
-        print(forecast.history)
       }
       
       # Save into a csv
@@ -1053,7 +1049,7 @@ save_forecast <- function(fdf, months = TRUE, monthly, modelname, history, file,
         
         # Forecast
         chosen.model <- select_model(wbeginning, series.ts, "weekly") # Choose model
-        mcast <- chosen_forecast(chosen.model, series.ts, monthly, freq = "weekly") # Output a forecast
+        mcast <- chosen_forecast(chosen.model, series.ts, history, freq = "weekly") # Output a forecast
         missing.fcast <- data.frame(time = tail(cutreal$startdate, 1), 
                                     model = modelnames[chosen.model], 
                                     forecast = mcast$fcast[1],
