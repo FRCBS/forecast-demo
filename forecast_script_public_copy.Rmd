@@ -197,7 +197,7 @@ plat.monthly <- aggregate(pcs ~ month(date) + year(date), data = all.plat, FUN =
 plat.retrn.monthly <- aggregate(pcs ~ month(date) + year(date), data = all.plat.retrn, FUN = sum)
 
 # Dates
-months <- seq(from = as.Date("2014-01-06"), to = max(distr$date), by = "month")
+months <- seq(from = as.Date("2014-01-01"), to = max(distr$date), by = "month")
 
 # Adjustment series
 adj <- as.numeric(bizdays(ts(months, start = decimal_date(as.Date("2014-01-06")), frequency = 12), FinCenter = "Zurich"))
